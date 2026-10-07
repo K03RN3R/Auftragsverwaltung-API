@@ -1,0 +1,548 @@
+﻿
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8" />
+    <title>AEV API Test UI</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+
+        h1, h2, h3 {
+            margin-top: 1.2rem;
+        }
+
+        .row {
+            margin-bottom: 8px;
+        }
+
+        label {
+            display: inline-block;
+            width: 140px;
+        }
+
+        input[type="text"], select, textarea {
+            width: 400px;
+        }
+
+        textarea {
+            height: 120px;
+        }
+
+        button {
+            margin-right: 8px;
+            margin-top: 4px;
+        }
+
+        .section {
+            border: 1px solid #ccc;
+            padding: 10px;
+            margin-top: 10px;
+        }
+
+        #responseStatus {
+            font-weight: bold;
+            margin-top: 10px;
+        }
+
+        pre {
+            background: #f5f5f5;
+            padding: 10px;
+            overflow-x: auto;
+        }
+
+        .log-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 8px;
+        }
+
+        .log-table th,
+        .log-table td {
+            padding: 6px 8px;
+            border: 1px solid #ddd;
+            font-size: 14px;
+        }
+
+        .log-table th {
+            background: #f0f0f0;
+        }
+
+        .badge {
+            display: inlay-block;
+            padding: 2px, 6px;
+            border-radius: 4px;
+            color: #fff;
+            font-size: 12px;
+        }
+
+        .badge-error{
+            background: #c0392b;
+        }
+
+        .badge-succes {
+            background: #27ae60;
+        }
+
+        .flex-row {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .flex-row .section {
+            flex: 1;
+            min-width: 300px;
+        }
+
+        small {
+            color: #666;
+        }
+    </style>
+</head>
+<body>
+    <h1>AEV API Test UI</h1>
+    <p><small>Einfaches Test-Frontend für deine AEV-Controller Endpunkte.</small></p>
+
+    <!-- Basis-Einstellungen -->
+    <div class="section">
+        <h2>Basis</h2>
+        <div class="row">
+            <label for="baseUrl">Base URL:</label>
+            <!-- ggf. anpassen -->
+            <input type="text" id="baseUrl" value="https://localhost:7116/api/AEV" />
+        </div>
+    </div>
+
+    <!-- Fehler- und Payload Tools -->
+    <div class="section">
+        <h2>Fehler testen &amp; Payloads</h2>               <!-- &amp gibt ein echtes & aus-->
+        <p>
+            Fülle schnell typische Fehlerfälle vor, um die Fehlerrückgaben der API zu prüfen,
+            oder nutze die Beispiel-Payloads  als Vorlage zum Schreiben in der DB.
+        </p>
+        <div class="flex-row">
+            <div class="section">
+                <h3>Fehlersimulation</h3>
+                <div class="row">
+                    <button type="button" onclick="prefill('POST' ,'/kunde', brokenKundeMissingMail)">
+                        POST /kunde &mdash; fehlende E-Mail     <!-- &mdash gibt mir einen verlängerten Bindestrich aus-->
+                    </button>
+                </div>
+                <div class="row">
+                    <button type="button" onclick="prefill('PUT' ,'/kunde/1', staleKundePayload, true)">
+                        PUT /kunde &mdash; veraltetes ETag
+                    </button>
+                </div>
+                <div class="row">
+                    <button type="button" onclick="prefill('POST' ,'/auftrag', brokenAuftragMissingIds)">
+                        POST /kunde &mdash; fehlende Fremdschlüssel
+                    </button>
+                </div>
+                <small>Setze die API absichtlich unter ungültige Bedingungen und beobachte die Responses.</small>
+            </div>
+
+            <div class="section">
+                <h3>Payload-Bibliothek</h3>
+                <p>Übernimm gültige Beispiel-Requests und passe sie an, um Daten in die Datenbank zu schreiben</p>
+                <div class="row">
+                    <button type="button" onclick="prefill('POST', '/kunde', exampleKundeCreate)">Kunde anlegen</button>
+                    <button type="button" onclick="prefill('POST', '/auftrag', exampleAuftragCreate)">Auftrag anlegen</button>
+                </div>
+                <div class="row">
+                    <button type="button" onclick="prefill('PUT', '/kunde/1', exampleKundePut, true)">Kunde aktualisieren</button>
+                    <button type="button" onclick="prefill('PUT', '/auftrag/1', exampleAuftragPut, true)">Auftrag aktualisieren</button>
+                </div>
+                <small>Diese Bodies enthalten bereits Felder für DB-Schreibzugriffe (SOLL-Werte,Status,Quellenangabe, usw.).</small>
+            </div>
+        </div>
+    </div>
+
+    <!-- Schnellwahl der Routen -->
+    <div class="section">
+        <h2>Routen-Schnellwahl</h2>
+
+        <h3>Kunde</h3>
+        <div class="row">
+            <button type="button"
+                    onclick="prefill('GET', '/kunde?page=1&pageSize=10')">
+                GET /kunde (Liste)
+            </button>
+            <button type="button"
+                    onclick="prefill('GET', '/kunde/1')">
+                GET /kunde/{id}
+            </button>
+            <button type="button"
+                    onclick="prefill('GET', '/kundeguid/00000000-0000-0000-0000-000000000000')">
+                GET /kundeguid/{guid}
+            </button>
+            <button type="button"
+                    onclick="prefill('POST', '/kunde', exampleKundeCreate)">
+                POST /kunde
+            </button>
+            <button type="button"
+                    onclick="prefill('PUT', '/kunde/1', exampleKundePut, true)">
+                PUT /kunde/{id}
+            </button>
+            <button type="button"
+                    onclick="prefill('DELETE', '/kunde/1')">
+                DELETE /kunde/{id}
+            </button>
+        </div>
+
+        <h3>Auftrag</h3>
+        <div class="row">
+            <button type="button"
+                    onclick="prefill('GET', '/auftrag?page=1&pageSize=10')">
+                GET /auftrag (Liste)
+            </button>
+            <button type="button"
+                    onclick="prefill('GET', '/auftrag/1')">
+                GET /auftrag/{id}
+            </button>
+            <button type="button"
+                    onclick="prefill('POST', '/auftrag', exampleAuftragCreate)">
+                POST /auftrag
+            </button>
+            <button type="button"
+                    onclick="prefill('PUT', '/auftrag/1', exampleAuftragPut, true)">
+                PUT /auftrag/{id}
+            </button>
+            <button type="button"
+                    onclick="prefill('DELETE', '/auftrag/1')">
+                DELETE /auftrag/{id}
+            </button>
+        </div>
+
+        <!-- Analog kannst du hier Buttons für Anlage, Fehlerbericht, Schicht, Spindel, Station, Status ergänzen -->
+    </div>
+
+    <!-- Generisches Request-Formular -->
+    <div class="section">
+        <h2>Request</h2>
+
+        <div class="row">
+            <label for="method">Methode:</label>
+            <select id="method">
+                <option>GET</option>
+                <option>POST</option>
+                <option>PUT</option>
+                <option>DELETE</option>
+            </select>
+        </div>
+
+        <div class="row">
+            <label for="path">Pfad (relativ zu Base URL):</label>
+            <input type="text" id="path" placeholder="/kunde?page=1&pageSize=10" />
+        </div>
+
+        <div class="row">
+            <label for="useEtag">If-Match verwenden:</label>
+            <input type="checkbox" id="useEtag" checked />
+            <small>Benutzt den zuletzt empfangenen ETag für PUT/DELETE.</small>
+        </div>
+
+        <div class="row">
+            <label for="etagInput">If-Match (manuell):</label>
+            <input type="text" id="etagInput" placeholder="\" AAAAAAAApBY=\"" />
+            <small>Überschreibt den gespeicherten ETag, falls gesetzt.</small>
+        </div>
+
+        <div class="row">
+            <label for="body">Request-Body (JSON):</label><br />
+            <textarea id="body" placeholder='{ "name": "Max Mustermann", ... }'></textarea>
+        </div>
+
+        <div class="row">
+            <button type="button" onclick="sendRequest()">Senden</button>
+        </div>
+    </div>
+
+    <!-- Response-Ausgabe -->
+    <div class="section">
+        <h2>Response</h2>
+        <div id="responseStatus"></div>
+        <div class="row">
+            <strong>ETag (zuletzt):</strong> <span id="lastEtag">(keiner)</span>
+        </div>
+        <h3>Body</h3>
+        <pre id="responseBody"></pre>
+        <h3>Headers</h3>
+        <pre id="responseHeaders"></pre>
+    </div>
+
+    <div class="section">
+        <h2>Live-Tracking von Fehlern</h2>
+        <div class="row">
+            <label for="liveTracking">Fehler automatisch protokollieren</label>
+            <input type="checkbox" id="liveTracking" checked />
+        </div>
+        <div class="row">
+            <label for="maxLogEntries">Anzahl Einträge:</label>"
+            <input type="number" id="maxLogEntries" value="20" min="1" max="200" />
+        </div>
+        <div class="row">
+            <small>Alle Antworten ab StatusCode 400 erscheinen hier laufend. So lassen sich Fehler während der Tests live verfolgen.</small>
+        </div>
+        <table class="log-table" aria-label="Fehler-Log">
+            <thead>
+                <tr>
+                    <th>Zeit</th>
+                    <th>Route</th>
+                    <th>Status</th>
+                    <th>Nachricht</th>
+                </tr>
+            </thead>
+            <tbody id="errorLog"></tbody>
+        </table>
+    </div>
+
+    <script>
+        // Beispiel-Bodies für Buttons
+        const exampleKundeCreate = JSON.stringify({
+            name: "Max Mustermann",
+            strasse: "Musterstraße",
+            hausnummer: "12a",
+            plz: 12345,
+            ort: "Musterstadt",
+            land: "Deutschland",
+            email: "max@example.com",
+            telefonnummer: "01234/56789",
+            // eigentlich solltest du ErstelltUtc/ErstelltVon serverseitig setzen
+            erstelltUtc: new Date().toISOString(),
+            erstelltVon: "WebUI"
+        }, null, 2);
+
+        const exampleKundePut = JSON.stringify({
+            name: "Max Mustermann (neu)",
+            strasse: "Neue Straße",
+            hausnummer: "13b",
+            plz: 12345,
+            ort: "Musterstadt",
+            land: "Deutschland",
+            email: "max.neu@example.com",
+            telefonnummer: "01234/56789",
+            geaendertUtc: new Date().toISOString(),
+            geaendertVon: "WebUI"
+        }, null, 2);
+
+        const exampleAuftragCreate = JSON.stringify({
+            kundeId: 1,
+            anlageId: 1,
+            auftragsname: "Testauftrag",
+            auftragstyp: "Standard",
+            mengeSOLL: 100,
+            mengeIO: 0,
+            mengeNIO: 0,
+            taktZiel: 10.5,
+            taktBerechnet: 0,
+            statusId: 1,
+            prioritaet: 1,
+            quelle: "WebUI",
+            erstelltUtc: new Date().toISOString(),
+            erstelltVon: "WebUI",
+            beladen: false,
+            beladenAnzahl: 0,
+            bilddaten: null
+        }, null, 2);
+
+        const exampleAuftragPut = JSON.stringify({
+            auftragsname: "Testauftrag (aktualisiert)",
+            auftragstyp: "Standard",
+            mengeSOLL: 120,
+            mengeIO: 10,
+            mengeNIO: 2,
+            taktZiel: 9.5,
+            taktBerechnet: 9.8,
+            statusId: 1,
+            prioritaet: 1,
+            quelle: "WebUI",
+            geaendertUtc: new Date().toISOString(),
+            geaendertVon: "WebUI",
+            beladen: true,
+            beladenAnzahl: 10,
+            bilddaten: null
+        }, null, 2);
+
+        //Fehlerhafte Beispiele für schnelle Tests
+        const brokenKundeMissingMail = JSON.stringify({         //JSON.stringify wandelt ein JS-Objekt in JSON-String um
+            name: "ohne Mail",
+            strasse: "Fehlerweg",
+            hausnummer: "404",
+            plz: 12345,
+            ort: "Wesel",
+            land: "Deutschland",
+            telefonnummer: "01234/56789",
+        }, null, 2);                                            //Null bedeutet keine Filterung und alles wird übernommen, 2 steht für einrückung (pretty-print)
+
+        const staleKundePayload = JSON. stringify ({
+            name: "Alter Datensatz",
+            strasse: "ETag Weg",
+            hausnummer: "1",
+            plz: 12345,
+            ort: "Bocholt",
+            land: "Deutschland",
+            email: "alte@etag.de",
+            telefonnummer: "01234/56789",
+        }, null, 2);
+
+        const brokenAuftragMissingIds = JSON.stringify({
+            auftragsname: "kein Kunde",
+            auftragstyp: "FERTIGUNG",
+            mengeSOLL: 5,
+            taktZiel: 9.78,
+            statusId: 1,
+            prioritaet: 1,
+            quelle: "Test-UI",
+        }, null, 2);
+
+        let lastEtag = null;
+        let errorEntries = [];
+
+        function prefill(method, path, body = "", requireEtag = false) {
+            document.getElementById("method").value = method;
+            document.getElementById("path").value = path;
+            document.getElementById("body").value = body;
+            document.getElementById("useEtag").checked = requireEtag;
+        }
+
+        async function sendRequest() {
+            const baseUrl = document.getElementById("baseUrl").value.replace(/\/+$/, "");
+            const method = document.getElementById("method").value;
+            const path = document.getElementById("path").value;
+            const bodyText = document.getElementById("body").value;
+            const useEtag = document.getElementById("useEtag").checked;
+            const manualEtag = document.getElementById("etagInput").value;
+
+            const url = baseUrl + path;
+
+            const headers = {
+                "Accept": "application/json"
+            };
+
+            if (method === "POST" || method === "PUT") {
+                headers["Content-Type"] = "application/json";
+            }
+
+            // If-Match Handling für PUT/DELETE
+            if ((method === "PUT" || method === "DELETE")) {
+                let etagToUse = null;
+
+                if (manualEtag && manualEtag.trim() !== "") {
+                    etagToUse = manualEtag.trim();
+                } else if (useEtag && lastEtag) {
+                    etagToUse = lastEtag;
+                }
+
+                if (etagToUse) {
+                    headers["If-Match"] = etagToUse;
+                }
+            }
+
+            let fetchOptions = { method, headers };
+
+            if (bodyText && (method === "POST" || method === "PUT")) {
+                fetchOptions.body = bodyText;
+            }
+
+            let response;
+            try {
+                response = await fetch(url, fetchOptions);
+            } catch (err) {
+                document.getElementById("responseStatus").textContent =
+                    "Fehler beim Request: " + err;
+                document.getElementById("responseBody").textContent = "";
+                document.getElementById("responseHeaders").textContent = "";
+                return;
+            }
+
+            const responseStatusText = 'Status: ${response.status} ${response.statusText}';
+            document.getElementById("responseStatus").textContent = responseStatusText;
+
+            // ETag aus Response mitloggen
+            const etag = response.headers.get("ETag");
+            if (etag) {
+                lastEtag = etag;
+                document.getElementById("lastEtag").textContent = etag;
+            }
+
+            // Header dumpen
+            const headersDump = [];
+            response.headers.forEach((v, k) => headersDump.push(`${k}: ${v}`));
+            document.getElementById("responseHeaders").textContent = headersDump.join("\n");
+
+            // Body anzeigen
+            let text;
+            try {
+                text = await response.text();
+            } catch {
+                text = "";
+            }
+
+            try {
+                const json = JSON.parse(text);
+                document.getElementById("responseBody").textContent =
+                    JSON.stringify(json, null, 2);
+                trackErrors(response.status, responseStatusText, json?.message || json?.title || text, url, method); //Fehler loggen, anzeigen, speichern, service schicken; bezug auf entsprechende route und methode
+            } catch {
+                document.getElementById("responseBody").textContent = text;
+                trackErrors(response.status, responseStatusText, text, url, method);
+            }
+        }
+
+        function trackErrors(status, statusText, method, url, message) {                    //gibt nur eine Fehlermeldung wenn Fehlercode größer 400 ist ind live tracking an ist
+            const liveTrackingEnabled = document.getElementById("liveTracking").checked;
+            if (!liveTrackingEnabled || status < 400) {
+                return;
+            }
+
+            const maxEntriesInput = document.getElementById("maxLogEntries");               // limitiert die anzahl der logs
+            const maxEntries = Math.max(1, Math.min(200, parseInt(maxEntriesInput.value, 10) || 20)); //parseint wandelt string in int um, 10 = dezimalsystem; min 1 log, max 200 logs; || 20 = default wert wenn nix eingegeben wurde
+
+            const entry = {
+                time: new Date().toLocaleTimeString(),
+                method,
+                url,
+                status,
+                statusText,
+                message: message || "(kein Body)"
+            };
+
+            errorEntries = [entry, ...errorEntries].slice(0, maxEntries);       //erstellt neue Fehlerliste und setzt den neuen an den anfang
+            renderErrorLog();
+        }
+
+        function renderErrorLog() {
+            const tbody = document.getElementById("errorLog");
+            tbody.innerHTML = "";
+
+            errorEntries.forEach(item => {
+                const row = document.createElement("tr");
+
+                const timeCell = document.createElement("td");
+                timeCell.textContent = item.time;
+                row.appendChild(timeCell);
+
+                const routeCell = document.createElement("td");
+                routeCell.textContent = `${item.method} ${item.url}`;
+                row.appendChild(routeCell);
+
+                const statusCell = document.createElement("td");
+                const badge = document.createElement("span");
+                badge.className = `badge ${item.status >= 500 ? "badge-error" : "badge-success"}`;
+                badge.textContent = item.statusText;
+                statusCell.appendChild(badge);
+                row.appendChild(statusCell);
+
+                const messageCell = document.createElement("td");
+                messageCell.textContent = item.message;
+                row.appendChild(messageCell);
+
+                tbody.appendChild(row);
+            });
+        }
+    </script>
+</body>
+</html>
